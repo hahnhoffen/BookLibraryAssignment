@@ -43,7 +43,7 @@ namespace BookLibrary.Tests.QueryHandlers
 
             // Act & Assert
             var ex = Assert.ThrowsAsync<KeyNotFoundException>(async () => await handler.Handle(query, default));
-            Assert.That(ex.Message, Is.EqualTo("Book not found."));
+            Assert.That(ex.Message, Is.EqualTo("Book not found.")); 
         }
     }
 }
