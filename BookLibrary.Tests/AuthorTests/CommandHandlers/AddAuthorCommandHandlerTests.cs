@@ -20,8 +20,7 @@ namespace BookLibrary.Tests.CommandHandlers
         public async Task Handle_ShouldAddAuthorToDatabase()
         {
             // Arrange
-            var fakeDatabase = new FakeDatabase();
-            var handler = new AddAuthorCommandHandler(fakeDatabase);
+            var handler = new AddAuthorCommandHandler(_fakeDatabase);
             var author = new Author { Id = Guid.NewGuid(), Name = "Test Author" };
             var command = new AddAuthorCommand(author);
 
@@ -29,32 +28,25 @@ namespace BookLibrary.Tests.CommandHandlers
             var result = await handler.Handle(command, default);
 
             // Assert
-            Assert.That(fakeDatabase.Authors.Count, Is.EqualTo(1)); // Verify that the author was added
-            Assert.That(fakeDatabase.Authors[0].Name, Is.EqualTo("Test Author")); // Verify the correct author
-            Assert.That(result.Name, Is.EqualTo("Test Author")); // Verify the returned result
+            Assert.That(_fakeDatabase.Authors.Count, Is.EqualTo(1));
+            Assert.That(_fakeDatabase.Authors[0].Name, Is.EqualTo("Test Author"));
+            Assert.That(result.Name, Is.EqualTo("Test Author"));
         }
 
 
         [Test]
-        public async Task Handle_ShouldThrowException_WhenAuthorDoesNotExist()
+        public void Handle_ShouldThrowException_WhenDuplicateAuthorAdded()
         {
             // Arrange
-            var handler = new GetAuthorQueryHandler(_fakeDatabase);
-            var nonExistentAuthorId = Guid.NewGuid();
-            var query = new GetAuthorQuery(nonExistentAuthorId);
+            var handler = new AddAuthorCommandHandler(_fakeDatabase);
+            var author = new Author { Id = Guid.NewGuid(), Name = "Duplicate Author" };
+            _fakeDatabase.Authors.Add(author);
 
-            try
-            {
-                // Act
-                await handler.Handle(query, default);
-                Assert.Fail("Expected ArgumentException was not thrown.");
-            }
-            catch (ArgumentException ex)
-            {
-                // Assert
-                Assert.That(ex.Message, Does.Contain($"Author with ID {nonExistentAuthorId} not found."));
-            }
+            var command = new AddAuthorCommand(author);
+
+            // Act & Assert
+            var ex = Assert.ThrowsAsync<ArgumentException>(async () => await handler.Handle(command, default));
+            Assert.That(ex.Message, Is.EqualTo("An author with this name already exists."));
         }
-
     }
 }

@@ -34,24 +34,15 @@ namespace BookLibrary.Tests.QueryHandlers
         }
 
         [Test]
-        public async Task Handle_ShouldThrowException_WhenAuthorDoesNotExist()
+        public void Handle_ShouldThrowException_WhenAuthorDoesNotExist()
         {
             // Arrange
             var handler = new GetAuthorQueryHandler(_fakeDatabase);
             var query = new GetAuthorQuery(Guid.NewGuid());
 
-            try
-            {
-                // Act
-                await handler.Handle(query, default);
-                Assert.Fail("Expected ArgumentException was not thrown.");
-            }
-            catch (ArgumentException ex)
-            {
-                // Assert
-                Assert.That(ex.Message, Does.Contain("not found"));
-            }
+            // Act & Assert
+            var ex = Assert.ThrowsAsync<ArgumentException>(async () => await handler.Handle(query, default));
+            Assert.That(ex.Message, Does.Contain("Author with ID"));
         }
-
     }
 }

@@ -25,11 +25,11 @@ namespace BookLibrary.Tests.CommandHandlers
             var command = new AddBookCommand(book);
 
             // Act
-            var result = await handler.Handle(command, default);
+            await handler.Handle(command, default);
 
             // Assert
-            Assert.That(result.Count, Is.EqualTo(1));
-            Assert.That(result[0].Title, Is.EqualTo("Test Book"));
+            Assert.That(_fakeDatabase.Books.Count, Is.EqualTo(1));
+            Assert.That(_fakeDatabase.Books[0].Title, Is.EqualTo("Test Book"));
         }
         [Test]
         public void Handle_ShouldThrowException_WhenDuplicateBookAdded()
@@ -37,13 +37,15 @@ namespace BookLibrary.Tests.CommandHandlers
             // Arrange
             var handler = new AddBookCommandHandler(_fakeDatabase);
             var book = new Book("Duplicate Book");
-            _fakeDatabase.Books.Add(book); // Add a duplicate
+            _fakeDatabase.Books.Add(book);
 
             var command = new AddBookCommand(book);
 
             // Act & Assert
-            Assert.ThrowsAsync<Exception>(async () => await handler.Handle(command, default));
+            var ex = Assert.ThrowsAsync<Exception>(async () => await handler.Handle(command, default));
+            Assert.That(ex.Message, Is.EqualTo("A book with this title already exists."));
         }
+
 
     }
 }

@@ -32,12 +32,15 @@ namespace BookLibrary.Tests.CommandHandlers
             var command = new UpdateBookCommand(updatedBook);
 
             // Act
-            var result = await handler.Handle(command, default);
+            await handler.Handle(command, default);
 
             // Assert
-            Assert.That(result.Count, Is.EqualTo(1));
-            Assert.That(result[0].Title, Is.EqualTo("Updated Title"));
+            Assert.That(_fakeDatabase.Books.Count, Is.EqualTo(1));
+            Assert.That(_fakeDatabase.Books[0].Title, Is.EqualTo("Updated Title"));
+            Assert.That(_fakeDatabase.Books[0].AuthorId, Is.EqualTo(updatedBook.AuthorId));
+            Assert.That(_fakeDatabase.Books[0].Year, Is.EqualTo(2024));
         }
+
         [Test]
         public void Handle_ShouldThrowException_WhenBookToUpdateDoesNotExist()
         {
@@ -47,7 +50,8 @@ namespace BookLibrary.Tests.CommandHandlers
             var command = new UpdateBookCommand(updatedBook);
 
             // Act & Assert
-            Assert.ThrowsAsync<KeyNotFoundException>(async () => await handler.Handle(command, default));
+            var ex = Assert.ThrowsAsync<KeyNotFoundException>(async () => await handler.Handle(command, default));
+            Assert.That(ex.Message, Is.EqualTo("Book not found."));
         }
     }
 }

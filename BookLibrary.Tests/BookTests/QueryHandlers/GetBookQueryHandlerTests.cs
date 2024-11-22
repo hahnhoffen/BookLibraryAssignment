@@ -33,15 +33,17 @@ namespace BookLibrary.Tests.QueryHandlers
             Assert.IsNotNull(result);
             Assert.That(result.Title, Is.EqualTo("Test Book"));
         }
+
         [Test]
         public void Handle_ShouldThrowException_WhenBookDoesNotExist()
         {
             // Arrange
             var handler = new GetBookQueryHandler(_fakeDatabase);
-            var query = new GetBookQuery(Guid.NewGuid()); // Non-existent ID
+            var query = new GetBookQuery(Guid.NewGuid());
 
             // Act & Assert
-            Assert.ThrowsAsync<KeyNotFoundException>(async () => await handler.Handle(query, default));
+            var ex = Assert.ThrowsAsync<KeyNotFoundException>(async () => await handler.Handle(query, default));
+            Assert.That(ex.Message, Is.EqualTo("Book not found."));
         }
     }
 }
