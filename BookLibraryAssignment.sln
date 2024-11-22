@@ -1,32 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35514.174
+VisualStudioVersion = 17.12.35514.174 d17.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domain", "Domain", "{1ED2CDA3-F89C-46BA-AC15-F9683C1072BD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookLibrary.Domain", "BookLibrary.Domain\BookLibrary.Domain.csproj", "{4CBE6EF2-771E-4FC1-9111-0653481D8F8A}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{64E92F0E-E121-4AEC-8590-A6910040451E}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{DE9BAFB0-C306-459B-AD39-8ED4AB036AD3}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{74AE007E-FB7A-439B-B9E1-67FFC6C9AFC2}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{14A0C62B-428E-4FC3-85C0-3D12A1ABF649}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookLibrary.Application", "BookLibrary.Application\BookLibrary.Application.csproj", "{1D93FAF5-0381-4E67-8410-34B403CED6B3}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookLibrary.Infrastructure", "BookLibrary.Infrastructure\BookLibrary.Infrastructure.csproj", "{203BD470-E034-4F13-8409-9299606492A5}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookLibrary.API", "BookLibrary.API\BookLibrary.API.csproj", "{7B7AAE02-9935-4857-ACCC-4D565BDA0BAB}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BookLibrary.Tests", "BookLibrary.Tests\BookLibrary.Tests.csproj", "{640C10F8-A645-4EB0-89FE-361EF8826B21}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WorkFlow", "WorkFlow", "{865D8DB8-8738-4FFC-800B-B105380A0D02}"
-	ProjectSection(SolutionItems) = preProject
-		.github\workflows\WF.txt = .github\workflows\WF.txt
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,31 +17,11 @@ Global
 		{4CBE6EF2-771E-4FC1-9111-0653481D8F8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4CBE6EF2-771E-4FC1-9111-0653481D8F8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4CBE6EF2-771E-4FC1-9111-0653481D8F8A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1D93FAF5-0381-4E67-8410-34B403CED6B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1D93FAF5-0381-4E67-8410-34B403CED6B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1D93FAF5-0381-4E67-8410-34B403CED6B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1D93FAF5-0381-4E67-8410-34B403CED6B3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{203BD470-E034-4F13-8409-9299606492A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{203BD470-E034-4F13-8409-9299606492A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{203BD470-E034-4F13-8409-9299606492A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{203BD470-E034-4F13-8409-9299606492A5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7B7AAE02-9935-4857-ACCC-4D565BDA0BAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7B7AAE02-9935-4857-ACCC-4D565BDA0BAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7B7AAE02-9935-4857-ACCC-4D565BDA0BAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7B7AAE02-9935-4857-ACCC-4D565BDA0BAB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{640C10F8-A645-4EB0-89FE-361EF8826B21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{640C10F8-A645-4EB0-89FE-361EF8826B21}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{640C10F8-A645-4EB0-89FE-361EF8826B21}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{640C10F8-A645-4EB0-89FE-361EF8826B21}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{4CBE6EF2-771E-4FC1-9111-0653481D8F8A} = {1ED2CDA3-F89C-46BA-AC15-F9683C1072BD}
-		{1D93FAF5-0381-4E67-8410-34B403CED6B3} = {74AE007E-FB7A-439B-B9E1-67FFC6C9AFC2}
-		{203BD470-E034-4F13-8409-9299606492A5} = {64E92F0E-E121-4AEC-8590-A6910040451E}
-		{7B7AAE02-9935-4857-ACCC-4D565BDA0BAB} = {DE9BAFB0-C306-459B-AD39-8ED4AB036AD3}
-		{640C10F8-A645-4EB0-89FE-361EF8826B21} = {14A0C62B-428E-4FC3-85C0-3D12A1ABF649}
 	EndGlobalSection
 EndGlobal
