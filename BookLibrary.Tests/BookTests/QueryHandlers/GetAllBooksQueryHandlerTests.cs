@@ -31,7 +31,8 @@ namespace BookLibrary.Tests.QueryHandlers
 
             // Assert
             Assert.That(result.Count, Is.EqualTo(2));
+            Assert.That(result[0].Title, Is.EqualTo("Book 1"));
+            Assert.That(result[1].Title, Is.EqualTo("Book 2"));
         }
-
     }
 }

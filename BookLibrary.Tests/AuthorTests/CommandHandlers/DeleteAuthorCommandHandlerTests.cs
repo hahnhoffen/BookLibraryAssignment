@@ -26,10 +26,10 @@ namespace BookLibrary.Tests.CommandHandlers
             var command = new DeleteAuthorCommand(author.Id);
 
             // Act
-            var result = await handler.Handle(command, default);
+            await handler.Handle(command, default);
 
             // Assert
-            Assert.That(result.Count, Is.EqualTo(0));
+            Assert.That(_fakeDatabase.Authors.Count, Is.EqualTo(0));
         }
 
         [Test]
@@ -40,7 +40,8 @@ namespace BookLibrary.Tests.CommandHandlers
             var command = new DeleteAuthorCommand(Guid.NewGuid());
 
             // Act & Assert
-            Assert.ThrowsAsync<KeyNotFoundException>(async () => await handler.Handle(command, default));
+            var ex = Assert.ThrowsAsync<KeyNotFoundException>(async () => await handler.Handle(command, default));
+            Assert.That(ex.Message, Is.EqualTo("Author not found."));
         }
     }
 }
