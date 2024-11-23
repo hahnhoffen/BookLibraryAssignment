@@ -6,29 +6,29 @@ namespace BookLibrary.Infrastructure.Repositories
 {
     public class FakeAuthorRepository : IAuthorRepository
     {
-        private readonly FakeDatabase _database;
+        private readonly FakeDatabase _fakeDatabase;
 
-        public FakeAuthorRepository(FakeDatabase database)
+        public FakeAuthorRepository(FakeDatabase fakeDatabase)
         {
-            _database = database;
+            _fakeDatabase = fakeDatabase;
         }
 
         public Task AddAsync(Author author)
         {
-            _database.Authors.Add(author);
+            _fakeDatabase.Authors.Add(author);
             return Task.CompletedTask;
         }
 
         public Task<Author> GetByIdAsync(Guid id) =>
-            Task.FromResult(_database.Authors.FirstOrDefault(author => author.Id == id));
+            Task.FromResult(_fakeDatabase.Authors.FirstOrDefault(author => author.Id == id));
 
         public Task<IEnumerable<Author>> GetAllAsync() =>
-            Task.FromResult(_database.Authors.AsEnumerable());
+            Task.FromResult(_fakeDatabase.Authors.AsEnumerable());
 
         public Task DeleteAsync(Guid id)
         {
-            var authorToDelete = _database.Authors.FirstOrDefault(author => author.Id == id);
-            if (authorToDelete != null) _database.Authors.Remove(authorToDelete);
+            var authorToDelete = _fakeDatabase.Authors.FirstOrDefault(author => author.Id == id);
+            if (authorToDelete != null) _fakeDatabase.Authors.Remove(authorToDelete);
             return Task.CompletedTask;
         }
     }

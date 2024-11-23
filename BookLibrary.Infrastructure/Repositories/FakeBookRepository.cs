@@ -6,35 +6,35 @@ namespace BookLibrary.Infrastructure.Repositories
 {
     public class FakeBookRepository : IBookRepository
     {
-        private readonly FakeDatabase _database;
+        private readonly FakeDatabase _fakeDatabase;
 
-        public FakeBookRepository(FakeDatabase database)
+        public FakeBookRepository(FakeDatabase fakeDatabase)
         {
-            _database = database;
+            _fakeDatabase = fakeDatabase;
         }
 
         public Task AddAsync(Book book)
         {
-            _database.Books.Add(book);
+            _fakeDatabase.Books.Add(book);
             return Task.CompletedTask;
         }
 
         public Task<Book> GetByIdAsync(Guid id) =>
-            Task.FromResult(_database.Books.FirstOrDefault(book => book.Id == id));
+            Task.FromResult(_fakeDatabase.Books.FirstOrDefault(book => book.Id == id));
 
         public Task<IEnumerable<Book>> GetAllAsync() =>
-            Task.FromResult(_database.Books.AsEnumerable());
+            Task.FromResult(_fakeDatabase.Books.AsEnumerable());
 
         public Task DeleteAsync(Guid id)
         {
-            var bookToDelete = _database.Books.FirstOrDefault(book => book.Id == id);
-            if (bookToDelete != null) _database.Books.Remove(bookToDelete);
+            var bookToDelete = _fakeDatabase.Books.FirstOrDefault(book => book.Id == id);
+            if (bookToDelete != null) _fakeDatabase.Books.Remove(bookToDelete);
             return Task.CompletedTask;
         }
 
         public Task UpdateAsync(Book book)
         {
-            var bookToUpdate = _database.Books.FirstOrDefault(existingBook => existingBook.Id == book.Id);
+            var bookToUpdate = _fakeDatabase.Books.FirstOrDefault(existingBook => existingBook.Id == book.Id);
             if (bookToUpdate != null)
             {
                 bookToUpdate.Title = book.Title;
