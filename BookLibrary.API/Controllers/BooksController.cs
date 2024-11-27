@@ -6,6 +6,7 @@ using BookLibrary.Application.Books.Commands.DeleteBook;
 using BookLibrary.Application.Books.Queries.GetBook;
 using BookLibrary.Application.Books.Queries.GetAllBooks;
 using BookLibrary.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookLibrary.API.Controllers
 {
@@ -52,7 +53,7 @@ namespace BookLibrary.API.Controllers
             var result = await _mediator.Send(query);
             return Ok(result);
         }
-
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAllBooks()
         {
