@@ -2,21 +2,34 @@
 using BookLibrary.Domain.Interface;
 using BookLibrary.Infrastructure.DataBase;
 using Microsoft.Extensions.DependencyInjection;
+using BookLibrary.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookLibrary.Infrastructure.DependencyInjection
 {
     public static class InfrastructureServiceRegistration
     {
-        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
+        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, bool useFakeDatabase = false)
         {
-            // Register FakeDatabase as a singleton
-            services.AddSingleton<FakeDatabase>();
-
-            // Register repositories for dependency injection
-            services.AddSingleton<IBookRepository, FakeBookRepository>();
-            services.AddSingleton<IAuthorRepository, FakeAuthorRepository>();
+            if (useFakeDatabase)
+            {
+                // Register FakeDatabase and repositories for testing
+                services.AddSingleton<FakeDatabase>();
+                services.AddSingleton<IBookRepository, FakeBookRepository>();
+                services.AddSingleton<IAuthorRepository, FakeAuthorRepository>();
+            }
+            else
+            {
+                // Register RealDatabase and repositories for production/development
+                services.AddDbContext<RealDataBase>(options =>
+                    options.UseSqlServer("DefaultConnection"));
+                services.AddScoped<IBookRepository, RealBookRepository>();
+                services.AddScoped<IAuthorRepository, RealAuthorRepository>();
+            }
 
             return services;
         }
+
     }
 }
+

@@ -5,6 +5,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using BookLibrary.API.Helpers;
 using Microsoft.OpenApi.Models;
+using BookLibrary.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Rewrite;
 
 namespace BookLibrary.API
 {
@@ -14,16 +17,22 @@ namespace BookLibrary.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // Configure EF Core
+            builder.Services.AddDbContext<RealDataBase>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), sqlOptions =>
+                    sqlOptions.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null)
+                )
+            );
+
+            // Add services to the container
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
 
-            // Add Swagger configuration for JWT
+            // Configure Swagger with JWT authentication
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "BookLibrary API", Version = "v1" });
 
-                // Configure JWT authentication in Swagger
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Name = "Authorization",
@@ -31,7 +40,7 @@ namespace BookLibrary.API
                     Scheme = "Bearer",
                     BearerFormat = "JWT",
                     In = ParameterLocation.Header,
-                    Description = "remove the symbols in the beginning and the end'"
+                    Description = "Enter 'Bearer {token}' to authorize your requests."
                 });
 
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -73,22 +82,30 @@ namespace BookLibrary.API
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // Validate Database Connection
+            using (var scope = app.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<RealDataBase>();
+                dbContext.Database.Migrate();
+            }
+
+            // Configure the HTTP request pipeline
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "BookLibrary API v1"));
+                app.UseRewriter(new RewriteOptions().AddRedirect("^$", "swagger"));
             }
 
             app.UseHttpsRedirection();
 
-            // Add authentication and authorization middleware
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();
 
             app.Run();
+            Console.WriteLine("Connection String: " + builder.Configuration.GetConnectionString("DefaultConnection"));
         }
     }
 }

@@ -99,5 +99,6 @@ namespace BookLibrary.API.Controllers
                 return StatusCode(500, new { message = "An unexpected error occurred.", details = ex.Message });
             }
         }
+
     }
 }

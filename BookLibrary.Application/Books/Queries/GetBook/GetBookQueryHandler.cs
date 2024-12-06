@@ -1,28 +1,23 @@
 ﻿using MediatR;
 using BookLibrary.Domain.Entities;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using BookLibrary.Infrastructure.DataBase;
+using BookLibrary.Domain.Interface;
+using BookLibrary.Application.Books.Queries.GetBook;
 
-namespace BookLibrary.Application.Books.Queries.GetBook
+public class GetBookQueryHandler : IRequestHandler<GetBookQuery, Book>
 {
-    public class GetBookQueryHandler : IRequestHandler<GetBookQuery, Book>
+    private readonly IBookRepository _bookRepository;
+
+    public GetBookQueryHandler(IBookRepository bookRepository)
     {
-        private readonly FakeDatabase _fakeDatabase;
+        _bookRepository = bookRepository;
+    }
 
-        public GetBookQueryHandler(FakeDatabase fakeDatabase)
-        {
-            _fakeDatabase = fakeDatabase;
-        }
+    public async Task<Book> Handle(GetBookQuery request, CancellationToken cancellationToken)
+    {
+        var book = await _bookRepository.GetByIdAsync(request.BookId);
+        if (book == null)
+            throw new KeyNotFoundException("Book not found.");
 
-        public Task<Book> Handle(GetBookQuery request, CancellationToken cancellationToken)
-        {
-            var book = _fakeDatabase.Books.FirstOrDefault(book => book.Id == request.BookId);
-            if (book == null)
-                throw new KeyNotFoundException("Book not found.");
-
-            return Task.FromResult(book);
-        }
+        return book;
     }
 }

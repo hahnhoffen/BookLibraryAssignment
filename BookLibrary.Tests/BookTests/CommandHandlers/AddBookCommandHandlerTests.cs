@@ -2,6 +2,7 @@
 using BookLibrary.Domain.Entities;
 using BookLibrary.Infrastructure.DataBase;
 using BookLibrary.Application.Books.Commands.AddBook;
+using BookLibrary.Infrastructure.Repositories;
 
 namespace BookLibrary.Tests.CommandHandlers
 {
@@ -9,18 +10,20 @@ namespace BookLibrary.Tests.CommandHandlers
     public class AddBookCommandHandlerTests
     {
         private FakeDatabase _fakeDatabase;
+        private FakeBookRepository _fakeRepository;
 
         [SetUp]
         public void Setup()
         {
             _fakeDatabase = new FakeDatabase();
+            _fakeRepository = new FakeBookRepository(_fakeDatabase);
         }
 
         [Test]
         public async Task Handle_ShouldAddBookToDatabase()
         {
             // Arrange
-            var handler = new AddBookCommandHandler(_fakeDatabase);
+            var handler = new AddBookCommandHandler(_fakeRepository);
             var book = new Book("Test Book");
             var command = new AddBookCommand(book);
 
@@ -28,14 +31,15 @@ namespace BookLibrary.Tests.CommandHandlers
             await handler.Handle(command, default);
 
             // Assert
-            Assert.That(_fakeDatabase.Books.Count, Is.EqualTo(1));
-            Assert.That(_fakeDatabase.Books[0].Title, Is.EqualTo("Test Book"));
+            Assert.That(_fakeDatabase.Books.Count, Is.EqualTo(4)); // 3 default books + 1 added
+            Assert.That(_fakeDatabase.Books[3].Title, Is.EqualTo("Test Book")); // Ensure the last book is the new one
         }
+
         [Test]
         public void Handle_ShouldThrowException_WhenDuplicateBookAdded()
         {
             // Arrange
-            var handler = new AddBookCommandHandler(_fakeDatabase);
+            var handler = new AddBookCommandHandler(_fakeRepository);
             var book = new Book("Duplicate Book");
             _fakeDatabase.Books.Add(book);
 

@@ -1,6 +1,7 @@
 ﻿using BookLibrary.Domain.Entities;
 using BookLibrary.Application.Books.Commands.DeleteBook;
 using BookLibrary.Infrastructure.DataBase;
+using BookLibrary.Infrastructure.Repositories;
 
 namespace BookLibrary.Tests.CommandHandlers
 {
@@ -8,18 +9,20 @@ namespace BookLibrary.Tests.CommandHandlers
     public class DeleteBookCommandHandlerTests
     {
         private FakeDatabase _fakeDatabase;
+        private FakeBookRepository _fakeRepository;
 
         [SetUp]
         public void Setup()
         {
             _fakeDatabase = new FakeDatabase();
+            _fakeRepository = new FakeBookRepository(_fakeDatabase);
         }
 
         [Test]
         public async Task Handle_ShouldDeleteBookFromDatabase()
         {
             // Arrange
-            var handler = new DeleteBookCommandHandler(_fakeDatabase);
+            var handler = new DeleteBookCommandHandler(_fakeRepository);
             var book = new Book("Test Book") { Id = Guid.NewGuid() };
             _fakeDatabase.Books.Add(book);
 
@@ -29,14 +32,16 @@ namespace BookLibrary.Tests.CommandHandlers
             await handler.Handle(command, default);
 
             // Assert
-            Assert.That(_fakeDatabase.Books.Count, Is.EqualTo(0));
+            Assert.That(_fakeDatabase.Books.Count, Is.EqualTo(3));
+            Assert.That(!_fakeDatabase.Books.Any(b => b.Id == book.Id));
         }
+
 
         [Test]
         public void Handle_ShouldThrowException_WhenBookToDeleteDoesNotExist()
         {
             // Arrange
-            var handler = new DeleteBookCommandHandler(_fakeDatabase);
+            var handler = new DeleteBookCommandHandler(_fakeRepository);
             var command = new DeleteBookCommand(Guid.NewGuid());
 
             // Act & Assert

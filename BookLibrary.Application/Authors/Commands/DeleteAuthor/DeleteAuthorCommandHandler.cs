@@ -1,27 +1,28 @@
 ﻿using MediatR;
 using BookLibrary.Domain.Entities;
-using BookLibrary.Infrastructure.DataBase;
+using BookLibrary.Domain.Interface;
 
 namespace BookLibrary.Application.Authors.Commands.DeleteAuthor
 {
     public class DeleteAuthorCommandHandler : IRequestHandler<DeleteAuthorCommand, List<Author>>
     {
-        private readonly FakeDatabase _fakeDatabase;
+        private readonly IAuthorRepository _authorRepository;
 
-        public DeleteAuthorCommandHandler(FakeDatabase fakeDatabase)
+        public DeleteAuthorCommandHandler(IAuthorRepository authorRepository)
         {
-            _fakeDatabase = fakeDatabase;
+            _authorRepository = authorRepository;
         }
 
-        public Task<List<Author>> Handle(DeleteAuthorCommand request, CancellationToken cancellationToken)
+        public async Task<List<Author>> Handle(DeleteAuthorCommand request, CancellationToken cancellationToken)
         {
-            var author = _fakeDatabase.Authors.FirstOrDefault(author => author.Id == request.AuthorId);
+            var author = await _authorRepository.GetByIdAsync(request.AuthorId);
             if (author == null)
                 throw new KeyNotFoundException("Author not found.");
 
-            _fakeDatabase.Authors.Remove(author);
+            await _authorRepository.DeleteAsync(request.AuthorId);
 
-            return Task.FromResult(_fakeDatabase.Authors);
+            var authors = await _authorRepository.GetAllAsync();
+            return authors.ToList();
         }
     }
 }

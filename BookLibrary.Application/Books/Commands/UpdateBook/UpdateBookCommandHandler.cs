@@ -1,20 +1,21 @@
 ﻿using MediatR;
 using BookLibrary.Domain.Entities;
-using BookLibrary.Infrastructure.DataBase;
+using BookLibrary.Domain.Interface;
 
 namespace BookLibrary.Application.Books.Commands.UpdateBook
 {
     public class UpdateBookCommandHandler : IRequestHandler<UpdateBookCommand, List<Book>>
     {
-        private readonly FakeDatabase _fakeDatabase;
+        private readonly IBookRepository _bookRepository;
 
-        public UpdateBookCommandHandler(FakeDatabase fakeDatabase)
+        public UpdateBookCommandHandler(IBookRepository bookRepository)
         {
-            _fakeDatabase = fakeDatabase;
+            _bookRepository = bookRepository;
         }
-        public Task<List<Book>> Handle(UpdateBookCommand request, CancellationToken cancellationToken)
+
+        public async Task<List<Book>> Handle(UpdateBookCommand request, CancellationToken cancellationToken)
         {
-            var book = _fakeDatabase.Books.FirstOrDefault(book => book.Id == request.UpdatedBook.Id);
+            var book = await _bookRepository.GetByIdAsync(request.UpdatedBook.Id);
             if (book == null)
                 throw new KeyNotFoundException("Book not found.");
 
@@ -22,7 +23,10 @@ namespace BookLibrary.Application.Books.Commands.UpdateBook
             book.AuthorId = request.UpdatedBook.AuthorId;
             book.Year = request.UpdatedBook.Year;
 
-            return Task.FromResult(_fakeDatabase.Books);
+            await _bookRepository.UpdateAsync(book);
+
+            var books = await _bookRepository.GetAllAsync();
+            return books.ToList();
         }
     }
 }

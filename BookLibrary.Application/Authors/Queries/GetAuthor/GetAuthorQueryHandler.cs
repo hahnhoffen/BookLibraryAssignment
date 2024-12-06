@@ -1,30 +1,27 @@
 ﻿using MediatR;
 using BookLibrary.Domain.Entities;
-using BookLibrary.Infrastructure.DataBase;
+using BookLibrary.Domain.Interface;
 
 namespace BookLibrary.Application.Authors.Queries.GetAuthor
 {
     public class GetAuthorQueryHandler : IRequestHandler<GetAuthorQuery, Author>
     {
-        private readonly FakeDatabase _fakeDatabase;
+        private readonly IAuthorRepository _authorRepository;
 
-        public GetAuthorQueryHandler(FakeDatabase fakeDatabase)
+        public GetAuthorQueryHandler(IAuthorRepository authorRepository)
         {
-            _fakeDatabase = fakeDatabase;
+            _authorRepository = authorRepository;
         }
 
-        public Task<Author> Handle(GetAuthorQuery request, CancellationToken cancellationToken)
+        public async Task<Author> Handle(GetAuthorQuery request, CancellationToken cancellationToken)
         {
-            // Find the author by AuthorId
-            var author = _fakeDatabase.Authors.FirstOrDefault(author => author.Id == request.AuthorId);
+            var author = await _authorRepository.GetByIdAsync(request.AuthorId);
             if (author == null)
             {
                 throw new ArgumentException($"Author with ID {request.AuthorId} not found.");
             }
 
-            return Task.FromResult(author);
+            return author;
         }
     }
 }
-
-

@@ -2,34 +2,49 @@
 using BookLibrary.Domain.Interface;
 using BookLibrary.Infrastructure.DataBase;
 
-namespace BookLibrary.Infrastructure.Repositories
+public class FakeAuthorRepository : IAuthorRepository
 {
-    public class FakeAuthorRepository : IAuthorRepository
+    private readonly FakeDatabase _fakeDatabase;
+
+    public FakeAuthorRepository(FakeDatabase fakeDatabase)
     {
-        private readonly FakeDatabase _fakeDatabase;
+        _fakeDatabase = fakeDatabase;
+    }
 
-        public FakeAuthorRepository(FakeDatabase fakeDatabase)
+    public Task AddAsync(Author author)
+    {
+        var existingAuthor = _fakeDatabase.Authors.FirstOrDefault(a => a.Id == author.Id);
+        if (existingAuthor != null)
         {
-            _fakeDatabase = fakeDatabase;
+            // Update existing author
+            existingAuthor.Name = author.Name;
         }
-
-        public Task AddAsync(Author author)
+        else
         {
+            // Add new author if not found
             _fakeDatabase.Authors.Add(author);
-            return Task.CompletedTask;
         }
+        return Task.CompletedTask;
+    }
 
-        public Task<Author> GetByIdAsync(Guid id) =>
-            Task.FromResult(_fakeDatabase.Authors.FirstOrDefault(author => author.Id == id));
+    public Task<Author> GetByIdAsync(Guid id)
+    {
+        return Task.FromResult(_fakeDatabase.Authors.FirstOrDefault(a => a.Id == id));
+    }
 
-        public Task<IEnumerable<Author>> GetAllAsync() =>
-            Task.FromResult(_fakeDatabase.Authors.AsEnumerable());
+    public Task<IEnumerable<Author>> GetAllAsync()
+    {
+        return Task.FromResult(_fakeDatabase.Authors.AsEnumerable());
+    }
 
-        public Task DeleteAsync(Guid id)
+    public Task DeleteAsync(Guid id)
+    {
+        var author = _fakeDatabase.Authors.FirstOrDefault(a => a.Id == id);
+        if (author != null)
         {
-            var authorToDelete = _fakeDatabase.Authors.FirstOrDefault(author => author.Id == id);
-            if (authorToDelete != null) _fakeDatabase.Authors.Remove(authorToDelete);
-            return Task.CompletedTask;
+            _fakeDatabase.Authors.Remove(author);
         }
+        return Task.CompletedTask;
     }
 }
+

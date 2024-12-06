@@ -1,6 +1,7 @@
 ﻿using BookLibrary.Domain.Entities;
 using BookLibrary.Application.Books.Commands.UpdateBook;
 using BookLibrary.Infrastructure.DataBase;
+using BookLibrary.Infrastructure.Repositories;
 
 namespace BookLibrary.Tests.CommandHandlers
 {
@@ -8,18 +9,20 @@ namespace BookLibrary.Tests.CommandHandlers
     public class UpdateBookCommandHandlerTests
     {
         private FakeDatabase _fakeDatabase;
+        private FakeBookRepository _fakeRepository;
 
         [SetUp]
         public void Setup()
         {
             _fakeDatabase = new FakeDatabase();
+            _fakeRepository = new FakeBookRepository(_fakeDatabase);
         }
 
         [Test]
         public async Task Handle_ShouldUpdateBookInDatabase()
         {
             // Arrange
-            var handler = new UpdateBookCommandHandler(_fakeDatabase);
+            var handler = new UpdateBookCommandHandler(_fakeRepository);
             var book = new Book("Original Title") { Id = Guid.NewGuid() };
             _fakeDatabase.Books.Add(book);
 
@@ -35,17 +38,20 @@ namespace BookLibrary.Tests.CommandHandlers
             await handler.Handle(command, default);
 
             // Assert
-            Assert.That(_fakeDatabase.Books.Count, Is.EqualTo(1));
-            Assert.That(_fakeDatabase.Books[0].Title, Is.EqualTo("Updated Title"));
-            Assert.That(_fakeDatabase.Books[0].AuthorId, Is.EqualTo(updatedBook.AuthorId));
-            Assert.That(_fakeDatabase.Books[0].Year, Is.EqualTo(2024));
+            Assert.That(_fakeDatabase.Books.Count, Is.EqualTo(4)); // Includes pre-populated books
+            var updated = _fakeDatabase.Books.FirstOrDefault(b => b.Id == book.Id);
+            Assert.That(updated, Is.Not.Null);
+            Assert.That(updated.Title, Is.EqualTo("Updated Title"));
+            Assert.That(updated.AuthorId, Is.EqualTo(updatedBook.AuthorId));
+            Assert.That(updated.Year, Is.EqualTo(2024));
         }
+
 
         [Test]
         public void Handle_ShouldThrowException_WhenBookToUpdateDoesNotExist()
         {
             // Arrange
-            var handler = new UpdateBookCommandHandler(_fakeDatabase);
+            var handler = new UpdateBookCommandHandler(_fakeRepository);
             var updatedBook = new Book("Non-Existent Book") { Id = Guid.NewGuid() };
             var command = new UpdateBookCommand(updatedBook);
 

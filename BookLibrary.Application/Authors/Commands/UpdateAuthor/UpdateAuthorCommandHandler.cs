@@ -1,26 +1,32 @@
-﻿using MediatR;
+﻿using BookLibrary.Application.Authors.Commands.UpdateAuthor;
 using BookLibrary.Domain.Entities;
-using BookLibrary.Infrastructure.DataBase;
+using BookLibrary.Domain.Interface;
+using MediatR;
 
-namespace BookLibrary.Application.Authors.Commands.UpdateAuthor
+public class UpdateAuthorCommandHandler : IRequestHandler<UpdateAuthorCommand, List<Author>>
 {
-    public class UpdateAuthorCommandHandler : IRequestHandler<UpdateAuthorCommand, List<Author>>
+    private readonly IAuthorRepository _authorRepository;
+
+    public UpdateAuthorCommandHandler(IAuthorRepository authorRepository)
     {
-        private readonly FakeDatabase _fakeDatabase;
+        _authorRepository = authorRepository;
+    }
 
-        public UpdateAuthorCommandHandler(FakeDatabase fakeDatabase)
-        {
-            _fakeDatabase = fakeDatabase;
-        }
-        public Task<List<Author>> Handle(UpdateAuthorCommand request, CancellationToken cancellationToken)
-        {
-            var author = _fakeDatabase.Authors.FirstOrDefault(a => a.Id == request.UpdatedAuthor.Id);
-            if (author == null)
-                throw new KeyNotFoundException("Author not found.");
+    public async Task<List<Author>> Handle(UpdateAuthorCommand request, CancellationToken cancellationToken)
+    {
+        var author = await _authorRepository.GetByIdAsync(request.UpdatedAuthor.Id);
+        if (author == null)
+            throw new KeyNotFoundException("Author not found.");
 
-            author.Name = request.UpdatedAuthor.Name;
+        // Update the author's properties
+        author.Name = request.UpdatedAuthor.Name;
 
-            return Task.FromResult(_fakeDatabase.Authors);
-        }
+        // Save changes
+        await _authorRepository.AddAsync(author);
+
+        // Return the updated list of authors
+        var authors = await _authorRepository.GetAllAsync();
+        return authors.ToList();
     }
 }
+
