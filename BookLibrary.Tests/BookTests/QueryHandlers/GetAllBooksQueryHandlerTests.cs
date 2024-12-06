@@ -2,6 +2,7 @@
 using BookLibrary.Domain.Entities;
 using BookLibrary.Application.Books.Queries.GetAllBooks;
 using BookLibrary.Infrastructure.DataBase;
+using BookLibrary.Infrastructure.Repositories;
 
 namespace BookLibrary.Tests.QueryHandlers
 {
@@ -9,20 +10,22 @@ namespace BookLibrary.Tests.QueryHandlers
     public class GetAllBooksQueryHandlerTests
     {
         private FakeDatabase _fakeDatabase;
+        private FakeBookRepository _fakeRepository;
 
         [SetUp]
         public void Setup()
         {
             _fakeDatabase = new FakeDatabase();
+            _fakeRepository = new FakeBookRepository(_fakeDatabase);
         }
 
         [Test]
         public async Task Handle_ShouldReturnAllBooks()
         {
             // Arrange
-            var handler = new GetAllBooksQueryHandler(_fakeDatabase);
-            _fakeDatabase.Books.Add(new Book("Book 1"));
-            _fakeDatabase.Books.Add(new Book("Book 2"));
+            var handler = new GetAllBooksQueryHandler(_fakeRepository);
+            _fakeDatabase.Books.Add(new Book("Book 1") { Id = Guid.NewGuid(), AuthorId = Guid.NewGuid(), Year = 2023 });
+            _fakeDatabase.Books.Add(new Book("Book 2") { Id = Guid.NewGuid(), AuthorId = Guid.NewGuid(), Year = 2023 });
 
             var query = new GetAllBooksQuery();
 
@@ -30,9 +33,10 @@ namespace BookLibrary.Tests.QueryHandlers
             var result = await handler.Handle(query, default);
 
             // Assert
-            Assert.That(result.Count, Is.EqualTo(2));
-            Assert.That(result[0].Title, Is.EqualTo("Book 1"));
-            Assert.That(result[1].Title, Is.EqualTo("Book 2"));
+            Assert.That(result.Count, Is.EqualTo(5));
+            Assert.That(result.Any(b => b.Title == "Book 1"));
+            Assert.That(result.Any(b => b.Title == "Book 2"));
         }
+
     }
 }

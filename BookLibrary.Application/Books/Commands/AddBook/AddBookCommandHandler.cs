@@ -1,28 +1,29 @@
-﻿using BookLibrary.Domain.Entities;
-using MediatR;
-using BookLibrary.Infrastructure.DataBase;
+﻿using MediatR;
+using BookLibrary.Domain.Entities;
+using BookLibrary.Domain.Interface;
 
 namespace BookLibrary.Application.Books.Commands.AddBook
 {
     public class AddBookCommandHandler : IRequestHandler<AddBookCommand, List<Book>>
     {
-        private readonly FakeDatabase _fakeDatabase;
+        private readonly IBookRepository _bookRepository;
 
-        public AddBookCommandHandler(FakeDatabase fakeDatabase)
+        public AddBookCommandHandler(IBookRepository bookRepository)
         {
-            _fakeDatabase = fakeDatabase;
+            _bookRepository = bookRepository;
         }
-        public Task<List<Book>> Handle(AddBookCommand request, CancellationToken cancellationToken)
+
+        public async Task<List<Book>> Handle(AddBookCommand request, CancellationToken cancellationToken)
         {
             // Check for duplicate books by title
-            if (_fakeDatabase.Books.Any(book => book.Title == request.NewBook.Title))
-            {
+            var books = await _bookRepository.GetAllAsync();
+            if (books.Any(book => book.Title == request.NewBook.Title))
                 throw new Exception("A book with this title already exists.");
-            }
-            // Add the new book
-            _fakeDatabase.Books.Add(request.NewBook);
 
-            return Task.FromResult(_fakeDatabase.Books);
+            await _bookRepository.AddAsync(request.NewBook);
+
+            books = await _bookRepository.GetAllAsync();
+            return books.ToList();
         }
     }
 }

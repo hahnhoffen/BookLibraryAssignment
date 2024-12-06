@@ -2,6 +2,7 @@
 using BookLibrary.Domain.Entities;
 using BookLibrary.Application.Books.Queries.GetBook;
 using BookLibrary.Infrastructure.DataBase;
+using BookLibrary.Infrastructure.Repositories;
 
 namespace BookLibrary.Tests.QueryHandlers
 {
@@ -9,18 +10,20 @@ namespace BookLibrary.Tests.QueryHandlers
     public class GetBookQueryHandlerTests
     {
         private FakeDatabase _fakeDatabase;
+        private FakeBookRepository _fakeRepository;
 
         [SetUp]
         public void Setup()
         {
             _fakeDatabase = new FakeDatabase();
+            _fakeRepository = new FakeBookRepository(_fakeDatabase);
         }
 
         [Test]
         public async Task Handle_ShouldReturnCorrectBook()
         {
             // Arrange
-            var handler = new GetBookQueryHandler(_fakeDatabase);
+            var handler = new GetBookQueryHandler(_fakeRepository);
             var book = new Book("Test Book") { Id = Guid.NewGuid() };
             _fakeDatabase.Books.Add(book);
 
@@ -30,7 +33,7 @@ namespace BookLibrary.Tests.QueryHandlers
             var result = await handler.Handle(query, default);
 
             // Assert
-            Assert.IsNotNull(result);
+            Assert.That(result, Is.Not.Null);
             Assert.That(result.Title, Is.EqualTo("Test Book"));
         }
 
@@ -38,7 +41,7 @@ namespace BookLibrary.Tests.QueryHandlers
         public void Handle_ShouldThrowException_WhenBookDoesNotExist()
         {
             // Arrange
-            var handler = new GetBookQueryHandler(_fakeDatabase);
+            var handler = new GetBookQueryHandler(_fakeRepository);
             var query = new GetBookQuery(Guid.NewGuid());
 
             // Act & Assert
