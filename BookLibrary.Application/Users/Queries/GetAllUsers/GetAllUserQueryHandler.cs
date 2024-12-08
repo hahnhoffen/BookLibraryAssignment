@@ -3,6 +3,7 @@ using BookLibrary.Domain.Interface;
 using MediatR;
 using BookLibrary.Application.Common;
 using Microsoft.Extensions.Logging;
+using BookLibrary.Infrastructure.Repositories;
 
 namespace BookLibrary.Application.Users.Queries.GetAllUsers
 {
@@ -10,6 +11,18 @@ namespace BookLibrary.Application.Users.Queries.GetAllUsers
     {
         private readonly IUserRepository _userRepository;
         private readonly ILogger<GetAllUsersQueryHandler> _logger;
+        private FakeUserRepository fakeUserRepository;
+        private RealUserRepository realUserRepository;
+
+        public GetAllUsersQueryHandler(FakeUserRepository fakeUserRepository)
+        {
+            this.fakeUserRepository = fakeUserRepository;
+        }
+
+        public GetAllUsersQueryHandler(RealUserRepository realUserRepository)
+        {
+            this.realUserRepository = realUserRepository;
+        }
 
         public GetAllUsersQueryHandler(IUserRepository userRepository, ILogger<GetAllUsersQueryHandler> logger)
         {

@@ -6,6 +6,7 @@ using BookLibrary.Application.Users.Queries.GetUser;
 using BookLibrary.Domain.Entities;
 using BookLibrary.Infrastructure.Repositories;
 using BookLibrary.Infrastructure.DataBase;
+using Microsoft.Extensions.Logging;
 
 namespace BookLibrary.Tests.UserTests.QueryHandlers
 {
@@ -14,6 +15,7 @@ namespace BookLibrary.Tests.UserTests.QueryHandlers
     {
         private FakeUserRepository _fakeUserRepository;
         private User _existingUser;
+        private ILogger<GetUserQueryHandler> _logger;
 
         [SetUp]
         public void SetUp()
@@ -29,12 +31,16 @@ namespace BookLibrary.Tests.UserTests.QueryHandlers
             };
 
             fakeDatabase.Users.Add(_existingUser);
+            _logger = LoggerFactory.Create(builder =>
+            {
+                builder.AddConsole();
+            }).CreateLogger<GetUserQueryHandler>();
         }
 
         [Test]
         public async Task Handle_ShouldReturnUser_WhenUserExists()
         {
-            var handler = new GetUserQueryHandler(_fakeUserRepository);
+            var handler = new GetUserQueryHandler(_fakeUserRepository, _logger);
             var query = new GetUserQuery(_existingUser.Id);
 
             var result = await handler.Handle(query, CancellationToken.None);
@@ -47,7 +53,7 @@ namespace BookLibrary.Tests.UserTests.QueryHandlers
         [Test]
         public async Task Handle_ShouldReturnFailure_WhenUserDoesNotExist()
         {
-            var handler = new GetUserQueryHandler(_fakeUserRepository);
+            var handler = new GetUserQueryHandler(_fakeUserRepository, _logger);
             var query = new GetUserQuery(Guid.NewGuid());
 
             var result = await handler.Handle(query, CancellationToken.None);

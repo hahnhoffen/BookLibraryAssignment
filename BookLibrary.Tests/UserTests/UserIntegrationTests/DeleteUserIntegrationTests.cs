@@ -4,9 +4,11 @@ using BookLibrary.Infrastructure.Data;
 using BookLibrary.Infrastructure.Repositories;
 using BookLibrary.Domain.Entities;
 using BookLibrary.Application.Users.Commands.DeleteUser;
-using MediatR;
 using BookLibrary.Application.Common;
+using System;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace BookLibrary.Tests.UserIntegrationTests
 {
@@ -16,6 +18,7 @@ namespace BookLibrary.Tests.UserIntegrationTests
         private RealDataBase _realDatabase;
         private RealUserRepository _realUserRepository;
         private DeleteUserCommandHandler _handler;
+        private ILogger<DeleteUserCommandHandler> _logger;
 
         [SetUp]
         public void SetUp()
@@ -26,23 +29,32 @@ namespace BookLibrary.Tests.UserIntegrationTests
 
             _realDatabase = new RealDataBase(options);
 
-            _realUserRepository = new RealUserRepository(_realDatabase);
-            _handler = new DeleteUserCommandHandler(_realUserRepository);
-
-            // Ensure database is clean and seeded before each test
+            // Clear the database for a clean test setup
             _realDatabase.Database.EnsureDeleted();
             _realDatabase.Database.EnsureCreated();
 
-            // Seed an initial user
-            _realDatabase.Users.Add(new User
+            // Add a user for testing
+            var testUser = new User
             {
                 Id = Guid.NewGuid(),
                 Username = "existinguser",
                 Email = "existinguser@example.com",
                 PasswordHash = "hashedpassword",
                 CreatedAt = DateTime.UtcNow
-            });
+            };
+
+            _realDatabase.Users.Add(testUser);
             _realDatabase.SaveChanges();
+
+            _realUserRepository = new RealUserRepository(_realDatabase);
+
+            // Add the logger instance
+            _logger = LoggerFactory.Create(builder =>
+            {
+                builder.AddConsole();
+            }).CreateLogger<DeleteUserCommandHandler>();
+
+            _handler = new DeleteUserCommandHandler(_realUserRepository, _logger);
         }
 
         [TearDown]
