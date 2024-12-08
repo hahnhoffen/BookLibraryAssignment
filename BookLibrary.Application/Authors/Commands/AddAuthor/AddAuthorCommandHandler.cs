@@ -1,10 +1,11 @@
 ﻿using MediatR;
 using BookLibrary.Domain.Entities;
 using BookLibrary.Domain.Interface;
+using BookLibrary.Application.Common;
 
 namespace BookLibrary.Application.Authors.Commands.AddAuthor
 {
-    public class AddAuthorCommandHandler : IRequestHandler<AddAuthorCommand, Author>
+    public class AddAuthorCommandHandler : IRequestHandler<AddAuthorCommand, OperationResult<Author>>
     {
         private readonly IAuthorRepository _authorRepository;
 
@@ -13,14 +14,14 @@ namespace BookLibrary.Application.Authors.Commands.AddAuthor
             _authorRepository = authorRepository;
         }
 
-        public async Task<Author> Handle(AddAuthorCommand request, CancellationToken cancellationToken)
+        public async Task<OperationResult<Author>> Handle(AddAuthorCommand request, CancellationToken cancellationToken)
         {
             // Check for duplicates
             var authors = await _authorRepository.GetAllAsync();
             if (authors.Any(author => author.Name == request.NewAuthor.Name))
-                throw new ArgumentException("An author with this name already exists.");
-
-            // Create and add the new author
+            {
+                return OperationResult<Author>.FailureResult("An author with this name already exists.");
+            }
             var newAuthor = new Author
             {
                 Id = Guid.NewGuid(),
@@ -28,7 +29,7 @@ namespace BookLibrary.Application.Authors.Commands.AddAuthor
             };
 
             await _authorRepository.AddAsync(newAuthor);
-            return newAuthor;
+            return OperationResult<Author>.SuccessResult(newAuthor, "Author successfully added.");
         }
     }
 }

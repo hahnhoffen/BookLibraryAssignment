@@ -4,6 +4,7 @@ using BookLibrary.Infrastructure.DataBase;
 using Microsoft.Extensions.DependencyInjection;
 using BookLibrary.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using BookLibrary.Infrastructure.Services;
 
 namespace BookLibrary.Infrastructure.DependencyInjection
 {
@@ -13,20 +14,20 @@ namespace BookLibrary.Infrastructure.DependencyInjection
         {
             if (useFakeDatabase)
             {
-                // Register FakeDatabase and repositories for testing
                 services.AddSingleton<FakeDatabase>();
                 services.AddSingleton<IBookRepository, FakeBookRepository>();
                 services.AddSingleton<IAuthorRepository, FakeAuthorRepository>();
+                services.AddSingleton<IUserRepository, FakeUserRepository>();
             }
             else
             {
-                // Register RealDatabase and repositories for production/development
                 services.AddDbContext<RealDataBase>(options =>
                     options.UseSqlServer("DefaultConnection"));
                 services.AddScoped<IBookRepository, RealBookRepository>();
                 services.AddScoped<IAuthorRepository, RealAuthorRepository>();
+                services.AddScoped<IPasswordService, PasswordService>();
+                services.AddScoped<IUserRepository, RealUserRepository>();
             }
-
             return services;
         }
 

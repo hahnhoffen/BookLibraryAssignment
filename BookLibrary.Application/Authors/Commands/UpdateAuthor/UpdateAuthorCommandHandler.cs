@@ -1,9 +1,10 @@
 ﻿using BookLibrary.Application.Authors.Commands.UpdateAuthor;
+using BookLibrary.Application.Common;
 using BookLibrary.Domain.Entities;
 using BookLibrary.Domain.Interface;
 using MediatR;
 
-public class UpdateAuthorCommandHandler : IRequestHandler<UpdateAuthorCommand, List<Author>>
+public class UpdateAuthorCommandHandler : IRequestHandler<UpdateAuthorCommand, OperationResult<List<Author>>>
 {
     private readonly IAuthorRepository _authorRepository;
 
@@ -12,11 +13,13 @@ public class UpdateAuthorCommandHandler : IRequestHandler<UpdateAuthorCommand, L
         _authorRepository = authorRepository;
     }
 
-    public async Task<List<Author>> Handle(UpdateAuthorCommand request, CancellationToken cancellationToken)
+    public async Task<OperationResult<List<Author>>> Handle(UpdateAuthorCommand request, CancellationToken cancellationToken)
     {
         var author = await _authorRepository.GetByIdAsync(request.UpdatedAuthor.Id);
         if (author == null)
-            throw new KeyNotFoundException("Author not found.");
+        {
+            return OperationResult<List<Author>>.FailureResult("Author not found.");
+        }
 
         // Update the author's properties
         author.Name = request.UpdatedAuthor.Name;
@@ -26,7 +29,7 @@ public class UpdateAuthorCommandHandler : IRequestHandler<UpdateAuthorCommand, L
 
         // Return the updated list of authors
         var authors = await _authorRepository.GetAllAsync();
-        return authors.ToList();
+        return OperationResult<List<Author>>.SuccessResult(authors.ToList(), "Author successfully updated.");
     }
 }
 

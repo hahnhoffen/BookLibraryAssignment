@@ -1,10 +1,11 @@
 ﻿using MediatR;
 using BookLibrary.Domain.Entities;
 using BookLibrary.Domain.Interface;
+using BookLibrary.Application.Common;
 
 namespace BookLibrary.Application.Authors.Commands.DeleteAuthor
 {
-    public class DeleteAuthorCommandHandler : IRequestHandler<DeleteAuthorCommand, List<Author>>
+    public class DeleteAuthorCommandHandler : IRequestHandler<DeleteAuthorCommand, OperationResult<List<Author>>>
     {
         private readonly IAuthorRepository _authorRepository;
 
@@ -13,16 +14,17 @@ namespace BookLibrary.Application.Authors.Commands.DeleteAuthor
             _authorRepository = authorRepository;
         }
 
-        public async Task<List<Author>> Handle(DeleteAuthorCommand request, CancellationToken cancellationToken)
+        public async Task<OperationResult<List<Author>>> Handle(DeleteAuthorCommand request, CancellationToken cancellationToken)
         {
             var author = await _authorRepository.GetByIdAsync(request.AuthorId);
             if (author == null)
-                throw new KeyNotFoundException("Author not found.");
-
+            {
+                return OperationResult<List<Author>>.FailureResult("Author not found.");
+            }
             await _authorRepository.DeleteAsync(request.AuthorId);
 
             var authors = await _authorRepository.GetAllAsync();
-            return authors.ToList();
+            return OperationResult<List<Author>>.SuccessResult(authors.ToList(), "Author successfully deleted.");
         }
     }
 }

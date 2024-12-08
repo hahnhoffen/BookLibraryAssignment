@@ -1,10 +1,11 @@
 ﻿using MediatR;
 using BookLibrary.Domain.Entities;
 using BookLibrary.Domain.Interface;
+using BookLibrary.Application.Common;
 
 namespace BookLibrary.Application.Authors.Queries.GetAllAuthors
 {
-    public class GetAllAuthorsQueryHandler : IRequestHandler<GetAllAuthorsQuery, List<Author>>
+    public class GetAllAuthorsQueryHandler : IRequestHandler<GetAllAuthorsQuery, OperationResult<List<Author>>>
     {
         private readonly IAuthorRepository _authorRepository;
 
@@ -13,10 +14,15 @@ namespace BookLibrary.Application.Authors.Queries.GetAllAuthors
             _authorRepository = authorRepository;
         }
 
-        public async Task<List<Author>> Handle(GetAllAuthorsQuery request, CancellationToken cancellationToken)
+        public async Task<OperationResult<List<Author>>> Handle(GetAllAuthorsQuery request, CancellationToken cancellationToken)
         {
             var authors = await _authorRepository.GetAllAsync();
-            return authors.ToList();
+            if (!authors.Any())
+            {
+                return OperationResult<List<Author>>.FailureResult("No authors found.");
+            }
+
+            return OperationResult<List<Author>>.SuccessResult(authors.ToList(), "Authors retrieved successfully.");
         }
     }
 }

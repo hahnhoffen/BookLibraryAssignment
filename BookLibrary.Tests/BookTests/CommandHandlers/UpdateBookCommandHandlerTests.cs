@@ -21,7 +21,6 @@ namespace BookLibrary.Tests.CommandHandlers
         [Test]
         public async Task Handle_ShouldUpdateBookInDatabase()
         {
-            // Arrange
             var handler = new UpdateBookCommandHandler(_fakeRepository);
             var book = new Book("Original Title") { Id = Guid.NewGuid() };
             _fakeDatabase.Books.Add(book);
@@ -34,30 +33,31 @@ namespace BookLibrary.Tests.CommandHandlers
             };
             var command = new UpdateBookCommand(updatedBook);
 
-            // Act
-            await handler.Handle(command, default);
+            var result = await handler.Handle(command, default);
 
             // Assert
-            Assert.That(_fakeDatabase.Books.Count, Is.EqualTo(4)); // Includes pre-populated books
-            var updated = _fakeDatabase.Books.FirstOrDefault(b => b.Id == book.Id);
-            Assert.That(updated, Is.Not.Null);
-            Assert.That(updated.Title, Is.EqualTo("Updated Title"));
-            Assert.That(updated.AuthorId, Is.EqualTo(updatedBook.AuthorId));
+            Assert.That(result.Success, Is.True);
+            Assert.That(result.Message, Is.EqualTo("Book successfully updated."));
+            Assert.That(result.Result.Count, Is.EqualTo(4));
+            var updated = result.Result.FirstOrDefault(b => b.Id == book.Id);
+            Assert.That(updated, Is.Not.Null); 
+            Assert.That(updated.Title, Is.EqualTo("Updated Title")); 
+            Assert.That(updated.AuthorId, Is.EqualTo(updatedBook.AuthorId)); 
             Assert.That(updated.Year, Is.EqualTo(2024));
         }
 
-
         [Test]
-        public void Handle_ShouldThrowException_WhenBookToUpdateDoesNotExist()
+        public async Task Handle_ShouldReturnFailure_WhenBookToUpdateDoesNotExist()
         {
-            // Arrange
             var handler = new UpdateBookCommandHandler(_fakeRepository);
             var updatedBook = new Book("Non-Existent Book") { Id = Guid.NewGuid() };
             var command = new UpdateBookCommand(updatedBook);
 
-            // Act & Assert
-            var ex = Assert.ThrowsAsync<KeyNotFoundException>(async () => await handler.Handle(command, default));
-            Assert.That(ex.Message, Is.EqualTo("Book not found."));
+            var result = await handler.Handle(command, default);
+
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Message, Is.EqualTo("Book not found.")); 
+            Assert.That(result.Result, Is.Null); 
         }
     }
 }

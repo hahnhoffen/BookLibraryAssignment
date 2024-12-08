@@ -32,20 +32,24 @@ namespace BookLibrary.Tests.QueryHandlers
             var result = await handler.Handle(query, default);
 
             // Assert
-            Assert.That(result, Is.Not.Null);
-            Assert.That(result.Name, Is.EqualTo("Test Author"));
+            Assert.That(result.Success, Is.True);
+            Assert.That(result.Message, Is.EqualTo("Test Author"));
+            Assert.That(result.Result.Count, Is.EqualTo(1));
         }
 
         [Test]
-        public void Handle_ShouldThrowException_WhenAuthorDoesNotExist()
+        public async Task Handle_ShouldReturnFailure_WhenAuthorDoesNotExist()
         {
             // Arrange
             var handler = new GetAuthorQueryHandler(_fakeRepository);
             var query = new GetAuthorQuery(Guid.NewGuid());
 
-            // Act & Assert
-            var ex = Assert.ThrowsAsync<ArgumentException>(async () => await handler.Handle(query, default));
-            Assert.That(ex.Message, Does.Contain("Author with ID"));
+
+            var result = await handler.Handle(query, default);
+            
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Message, Does.Contain("Author with ID"));
+            Assert.That(result.Result, Is.Null);
         }
     }
 }

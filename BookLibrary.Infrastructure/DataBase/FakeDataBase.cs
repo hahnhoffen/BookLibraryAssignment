@@ -7,6 +7,7 @@ namespace BookLibrary.Infrastructure.DataBase
     {
         public List<Book> Books { get; set; } = new();
         public List<Author> Authors { get; set; } = new();
+        public List<User> Users { get; set; } = new();
         public FakeDatabase()
         {
             // Add pre-existing authors
@@ -24,6 +25,14 @@ namespace BookLibrary.Infrastructure.DataBase
             new Book { Id = Guid.NewGuid(), Title = "A Game of Thrones", AuthorId = Authors[1].Id, Year = 1996 },
             new Book { Id = Guid.NewGuid(), Title = "The Hobbit", AuthorId = Authors[2].Id, Year = 1937 }
         });
+            Users.Add(new User
+            {
+                Id = Guid.NewGuid(),
+                Username = "admin",
+                Email = "admin@example.com",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("password"),
+                CreatedAt = DateTime.UtcNow
+            });
         }
     }
 

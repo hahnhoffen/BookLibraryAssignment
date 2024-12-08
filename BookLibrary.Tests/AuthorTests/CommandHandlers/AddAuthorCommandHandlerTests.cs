@@ -28,25 +28,30 @@ namespace BookLibrary.Tests.CommandHandlers
 
             var result = await handler.Handle(command, default);
 
+            Assert.That(result.Success, Is.True);
+            Assert.That(result.Message, Is.EqualTo("Author successfully added."));
+            Assert.That(result.Result.Name, Is.EqualTo("Test Author"));
             Assert.That(_fakeDatabase.Authors.Count, Is.EqualTo(4));
-
-            Assert.That(_fakeDatabase.Authors[3].Name, Is.EqualTo("Test Author"));
-
-            Assert.That(result.Name, Is.EqualTo("Test Author"));
         }
 
 
         [Test]
-        public void Handle_ShouldThrowException_WhenDuplicateAuthorAdded()
+        public async Task Handle_ShouldReturnFailure_WhenDuplicateAuthorAdded()
         {
+
             var handler = new AddAuthorCommandHandler(_fakeRepository);
-            var author = new Author { Id = Guid.NewGuid(), Name = "Duplicate Author" };
-            _fakeDatabase.Authors.Add(author);
+            var existingAuthor = new Author { Id = Guid.NewGuid(), Name = "Duplicate Author" };
+            _fakeDatabase.Authors.Add(existingAuthor);
 
-            var command = new AddAuthorCommand(author);
+            var command = new AddAuthorCommand(existingAuthor);
 
-            var ex = Assert.ThrowsAsync<ArgumentException>(async () => await handler.Handle(command, default));
-            Assert.That(ex.Message, Is.EqualTo("An author with this name already exists."));
+
+            var result = await handler.Handle(command, default);
+
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Message, Is.EqualTo("An author with this name already exists."));
+            Assert.That(result.Result, Is.Null);
+            Assert.That(_fakeDatabase.Authors.Count, Is.EqualTo(4));
         }
     }
 }

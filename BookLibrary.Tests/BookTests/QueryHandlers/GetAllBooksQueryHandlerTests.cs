@@ -33,9 +33,11 @@ namespace BookLibrary.Tests.QueryHandlers
             var result = await handler.Handle(query, default);
 
             // Assert
-            Assert.That(result.Count, Is.EqualTo(5));
-            Assert.That(result.Any(b => b.Title == "Book 1"));
-            Assert.That(result.Any(b => b.Title == "Book 2"));
+            Assert.That(result.Success, Is.True);
+            Assert.That(result.Message, Is.EqualTo("Books retrieved successfully."));
+            Assert.That(result.Result.Count, Is.EqualTo(5));
+            Assert.That(result.Result.Any(b => b.Title == "Book 1"));
+            Assert.That(result.Result.Any(b => b.Title == "Book 2"));
         }
 
     }

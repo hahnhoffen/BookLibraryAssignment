@@ -28,15 +28,17 @@ namespace BookLibrary.Tests.CommandHandlers
             var command = new AddBookCommand(book);
 
             // Act
-            await handler.Handle(command, default);
+            var result = await handler.Handle(command, default);
 
             // Assert
-            Assert.That(_fakeDatabase.Books.Count, Is.EqualTo(4)); // 3 default books + 1 added
-            Assert.That(_fakeDatabase.Books[3].Title, Is.EqualTo("Test Book")); // Ensure the last book is the new one
+            Assert.That(result.Success, Is.True);
+            Assert.That(result.Message, Is.EqualTo("Book successfully added."));
+            Assert.That(result.Result.Count, Is.EqualTo(4));
+            Assert.That(result.Result[3].Title, Is.EqualTo("Test Book"));
         }
 
         [Test]
-        public void Handle_ShouldThrowException_WhenDuplicateBookAdded()
+        public async Task Handle_ShouldReturnFailure_WhenDuplicateBookAdded()
         {
             // Arrange
             var handler = new AddBookCommandHandler(_fakeRepository);
@@ -45,11 +47,11 @@ namespace BookLibrary.Tests.CommandHandlers
 
             var command = new AddBookCommand(book);
 
-            // Act & Assert
-            var ex = Assert.ThrowsAsync<Exception>(async () => await handler.Handle(command, default));
-            Assert.That(ex.Message, Is.EqualTo("A book with this title already exists."));
+            var result = await handler.Handle(command, default);
+
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Message, Is.EqualTo("A book with this title already exists."));
+            Assert.That(result.Result, Is.Null);
         }
-
-
     }
 }

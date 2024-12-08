@@ -28,7 +28,7 @@ namespace BookLibrary.API.Controllers
             {
                 var command = new AddAuthorCommand(author);
                 var result = await _mediator.Send(command);
-                return CreatedAtAction(nameof(GetAuthor), new { id = result.Id }, result);
+                return CreatedAtAction(nameof(GetAuthor), new { id = result.Result.Id }, result);
             }
             catch (ArgumentException ex)
             {
@@ -84,7 +84,7 @@ namespace BookLibrary.API.Controllers
             }
         }
 
-
+         
         [HttpGet]
         public async Task<IActionResult> GetAllAuthors()
         {

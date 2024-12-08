@@ -21,32 +21,33 @@ namespace BookLibrary.Tests.CommandHandlers
         [Test]
         public async Task Handle_ShouldDeleteBookFromDatabase()
         {
-            // Arrange
             var handler = new DeleteBookCommandHandler(_fakeRepository);
             var book = new Book("Test Book") { Id = Guid.NewGuid() };
             _fakeDatabase.Books.Add(book);
 
             var command = new DeleteBookCommand(book.Id);
 
-            // Act
-            await handler.Handle(command, default);
+            var result = await handler.Handle(command, default);
 
-            // Assert
-            Assert.That(_fakeDatabase.Books.Count, Is.EqualTo(3));
-            Assert.That(!_fakeDatabase.Books.Any(b => b.Id == book.Id));
+            Assert.That(result.Success, Is.True);
+            Assert.That(result.Message, Is.EqualTo("Book successfully deleted."));
+            Assert.That(result.Result.Count, Is.EqualTo(3));
+            Assert.That(!result.Result.Any(b => b.Id == book.Id));
         }
 
 
         [Test]
-        public void Handle_ShouldThrowException_WhenBookToDeleteDoesNotExist()
+        public async Task Handle_ShouldReturnFailure_WhenBookToDeleteDoesNotExist()
         {
             // Arrange
             var handler = new DeleteBookCommandHandler(_fakeRepository);
             var command = new DeleteBookCommand(Guid.NewGuid());
 
             // Act & Assert
-            var ex = Assert.ThrowsAsync<KeyNotFoundException>(async () => await handler.Handle(command, default));
-            Assert.That(ex.Message, Is.EqualTo("Book not found."));
+            var result = await handler.Handle(command, default);
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Message, Is.EqualTo("Book not found."));
+            Assert.That(result.Result, Is.Null);
         }
     }
 }
