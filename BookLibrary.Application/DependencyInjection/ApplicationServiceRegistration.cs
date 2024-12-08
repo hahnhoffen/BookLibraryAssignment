@@ -8,7 +8,6 @@ namespace BookLibrary.Application.DependencyInjection
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
-            // Register MediatR and scan the assembly containing handlers
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(AddBookCommand).Assembly));
 
             return services;

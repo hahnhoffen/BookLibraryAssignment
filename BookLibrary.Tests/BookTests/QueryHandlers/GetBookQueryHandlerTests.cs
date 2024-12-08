@@ -33,20 +33,26 @@ namespace BookLibrary.Tests.QueryHandlers
             var result = await handler.Handle(query, default);
 
             // Assert
-            Assert.That(result, Is.Not.Null);
-            Assert.That(result.Title, Is.EqualTo("Test Book"));
+            Assert.That(result.Success, Is.True);
+            Assert.That(result.Message, Is.EqualTo("Book retrieved successfully.")); 
+            Assert.That(result.Result, Is.Not.Null);
+            Assert.That(result.Result.Title, Is.EqualTo("Test Book"));
         }
 
         [Test]
-        public void Handle_ShouldThrowException_WhenBookDoesNotExist()
+        public async Task Handle_ShouldReturnFailure_WhenBookDoesNotExist()
         {
             // Arrange
             var handler = new GetBookQueryHandler(_fakeRepository);
             var query = new GetBookQuery(Guid.NewGuid());
 
-            // Act & Assert
-            var ex = Assert.ThrowsAsync<KeyNotFoundException>(async () => await handler.Handle(query, default));
-            Assert.That(ex.Message, Is.EqualTo("Book not found.")); 
+            // Act
+            var result = await handler.Handle(query, default);
+
+            // Assert
+            Assert.That(result.Success, Is.False); 
+            Assert.That(result.Message, Is.EqualTo("Book not found.")); 
+            Assert.That(result.Result, Is.Null); 
         }
     }
 }

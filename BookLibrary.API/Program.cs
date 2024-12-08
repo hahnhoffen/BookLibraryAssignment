@@ -8,6 +8,7 @@ using Microsoft.OpenApi.Models;
 using BookLibrary.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Rewrite;
+using BookLibrary.Infrastructure.Services;
 
 namespace BookLibrary.API
 {
@@ -17,18 +18,15 @@ namespace BookLibrary.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Configure EF Core
             builder.Services.AddDbContext<RealDataBase>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), sqlOptions =>
                     sqlOptions.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null)
                 )
             );
 
-            // Add services to the container
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
 
-            // Configure Swagger with JWT authentication
             builder.Services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "BookLibrary API", Version = "v1" });
@@ -59,7 +57,6 @@ namespace BookLibrary.API
                 });
             });
 
-            // Add Authentication
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -79,17 +76,16 @@ namespace BookLibrary.API
             builder.Services.AddAuthorization();
             builder.Services.AddApplicationServices();
             builder.Services.AddInfrastructureServices();
+            builder.Services.AddLogging();
 
             var app = builder.Build();
 
-            // Validate Database Connection
             using (var scope = app.Services.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<RealDataBase>();
                 dbContext.Database.Migrate();
             }
 
-            // Configure the HTTP request pipeline
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -103,7 +99,12 @@ namespace BookLibrary.API
             app.UseAuthorization();
 
             app.MapControllers();
-
+            if (app.Environment.IsDevelopment())
+            {
+                var passwordService = new PasswordService();
+                var hashedPassword = passwordService.HashPassword("mypassword");
+                Console.WriteLine($"Development Only: Hashed Password: {hashedPassword}");
+            }
             app.Run();
             Console.WriteLine("Connection String: " + builder.Configuration.GetConnectionString("DefaultConnection"));
         }

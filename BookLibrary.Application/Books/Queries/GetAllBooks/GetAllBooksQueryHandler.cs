@@ -1,10 +1,11 @@
 ﻿using MediatR;
 using BookLibrary.Domain.Entities;
 using BookLibrary.Domain.Interface;
+using BookLibrary.Application.Common;
 
 namespace BookLibrary.Application.Books.Queries.GetAllBooks
 {
-    public class GetAllBooksQueryHandler : IRequestHandler<GetAllBooksQuery, List<Book>>
+    public class GetAllBooksQueryHandler : IRequestHandler<GetAllBooksQuery, OperationResult<List<Book>>>
     {
         private readonly IBookRepository _bookRepository;
 
@@ -13,10 +14,14 @@ namespace BookLibrary.Application.Books.Queries.GetAllBooks
             _bookRepository = bookRepository;
         }
 
-        public async Task<List<Book>> Handle(GetAllBooksQuery request, CancellationToken cancellationToken)
+        public async Task<OperationResult<List<Book>>> Handle(GetAllBooksQuery request, CancellationToken cancellationToken)
         {
             var books = await _bookRepository.GetAllAsync();
-            return books.ToList();
+            if (!books.Any())
+            {
+                return OperationResult<List<Book>>.FailureResult("No books found.");
+            }
+            return OperationResult<List<Book>>.SuccessResult(books.ToList(), "Books retrieved successfully.");
         }
     }
 }

@@ -29,25 +29,28 @@ namespace BookLibrary.Tests.CommandHandlers
             var updatedAuthor = new Author { Id = author.Id, Name = "Updated Name" };
             var command = new UpdateAuthorCommand(updatedAuthor);
 
-            await handler.Handle(command, default);
+            var result = await handler.Handle(command, default);
 
-            Assert.That(_fakeDatabase.Authors.Count, Is.EqualTo(4)); // Includes pre-populated authors
+            Assert.That(result.Success, Is.True);
+            Assert.That(result.Message, Is.EqualTo("Author successfully updated."));
+            Assert.That(result.Result.Count, Is.EqualTo(4));
             var updated = _fakeDatabase.Authors.FirstOrDefault(a => a.Id == author.Id);
             Assert.That(updated, Is.Not.Null);
             Assert.That(updated.Name, Is.EqualTo("Updated Name"));
         }
 
         [Test]
-        public void Handle_ShouldThrowException_WhenAuthorToUpdateDoesNotExist()
+        public async Task Handle_ShouldReturnFailure_WhenAuthorToUpdateDoesNotExist()
         {
-            // Arrange
             var handler = new UpdateAuthorCommandHandler(_fakeRepository);
             var updatedAuthor = new Author { Id = Guid.NewGuid(), Name = "Non-Existent Author" };
             var command = new UpdateAuthorCommand(updatedAuthor);
 
-            // Act & Assert
-            var ex = Assert.ThrowsAsync<KeyNotFoundException>(async () => await handler.Handle(command, default));
-            Assert.That(ex.Message, Is.EqualTo("Author not found."));
+            var result = await handler.Handle(command, default);
+
+            Assert.That(result.Success, Is.False);
+            Assert.That(result.Message, Is.EqualTo("Author not found."));
+            Assert.That(result.Result, Is.Null);
         }
     }
 }

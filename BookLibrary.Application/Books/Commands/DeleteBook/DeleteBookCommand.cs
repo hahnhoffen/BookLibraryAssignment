@@ -1,10 +1,11 @@
 ﻿using MediatR;
 using BookLibrary.Domain.Entities;
 using System.Collections.Generic;
+using BookLibrary.Application.Common;
 
 namespace BookLibrary.Application.Books.Commands.DeleteBook
 {
-    public class DeleteBookCommand : IRequest<List<Book>>
+    public class DeleteBookCommand : IRequest<OperationResult<List<Book>>>
     {
         public DeleteBookCommand(Guid bookId)
         {
