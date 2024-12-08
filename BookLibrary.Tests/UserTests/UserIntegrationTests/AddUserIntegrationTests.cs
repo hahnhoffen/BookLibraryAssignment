@@ -8,6 +8,7 @@ using MediatR;
 using BookLibrary.Application.Common;
 using System.Threading.Tasks;
 using BookLibrary.Infrastructure.Services;
+using Microsoft.Extensions.Logging;
 
 namespace BookLibrary.Tests.UserIntegrationTests
 {
@@ -17,6 +18,7 @@ namespace BookLibrary.Tests.UserIntegrationTests
         private RealDataBase _realDatabase;
         private RealUserRepository _realUserRepository;
         private AddUserCommandHandler _handler;
+        private ILogger<AddUserCommandHandler> _logger;
 
         [SetUp]
         public void SetUp()
@@ -26,11 +28,14 @@ namespace BookLibrary.Tests.UserIntegrationTests
                 .Options;
 
             _realDatabase = new RealDataBase(options);
-
-            _realDatabase.Database.EnsureCreated();
-
+            _realDatabase.Users.RemoveRange(_realDatabase.Users);
+            _realDatabase.SaveChanges();
             _realUserRepository = new RealUserRepository(_realDatabase);
-            _handler = new AddUserCommandHandler(_realUserRepository, new PasswordService());
+            _logger = LoggerFactory.Create(builder =>
+            {
+                builder.AddConsole();
+            }).CreateLogger<AddUserCommandHandler>();
+            _handler = new AddUserCommandHandler(_realUserRepository, new PasswordService(), _logger);
         }
 
         [TearDown]
@@ -58,6 +63,10 @@ namespace BookLibrary.Tests.UserIntegrationTests
             var result = await _handler.Handle(command, default);
 
             // Assert
+            if (!result.Success)
+            {
+                Console.WriteLine($"Operation failed: {result.Message}");
+            }
             Assert.That(result.Success, Is.True);
             Assert.That(result.Message, Is.EqualTo("User added successfully."));
             Assert.That(_realDatabase.Users.Count(), Is.EqualTo(1));

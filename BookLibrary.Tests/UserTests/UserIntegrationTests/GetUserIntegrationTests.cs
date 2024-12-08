@@ -6,6 +6,7 @@ using BookLibrary.Domain.Entities;
 using BookLibrary.Application.Users.Queries.GetUser;
 using MediatR;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace BookLibrary.Tests.UserIntegrationTests
 {
@@ -15,6 +16,7 @@ namespace BookLibrary.Tests.UserIntegrationTests
         private RealDataBase _realDatabase;
         private RealUserRepository _realUserRepository;
         private GetUserQueryHandler _handler;
+        private ILogger<GetUserQueryHandler> _logger;
 
         [SetUp]
         public void SetUp()
@@ -26,13 +28,16 @@ namespace BookLibrary.Tests.UserIntegrationTests
             _realDatabase = new RealDataBase(options);
 
             _realUserRepository = new RealUserRepository(_realDatabase);
-            _handler = new GetUserQueryHandler(_realUserRepository);
+            _logger = LoggerFactory.Create(builder =>
+            {
+                builder.AddConsole();
+                builder.SetMinimumLevel(LogLevel.Debug);
+            }).CreateLogger<GetUserQueryHandler>();
+            _handler = new GetUserQueryHandler(_realUserRepository, _logger);
 
-            // Ensure database is clean and seeded before each test
             _realDatabase.Database.EnsureDeleted();
             _realDatabase.Database.EnsureCreated();
 
-            // Seed a user
             _realDatabase.Users.Add(new User
             {
                 Id = Guid.NewGuid(),

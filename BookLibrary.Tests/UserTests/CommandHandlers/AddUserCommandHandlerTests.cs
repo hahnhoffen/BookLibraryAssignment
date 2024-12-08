@@ -7,6 +7,8 @@ using BookLibrary.Domain.Entities;
 using BookLibrary.Infrastructure.Repositories;
 using BookLibrary.Infrastructure.DataBase;
 using BookLibrary.Infrastructure.Services;
+using Microsoft.Extensions.Logging;
+using BookLibrary.Application.Users.Queries.GetUser;
 
 namespace BookLibrary.Tests.UserTests.CommandHandlers
 {
@@ -15,15 +17,15 @@ namespace BookLibrary.Tests.UserTests.CommandHandlers
     {
         private FakeUserRepository _fakeUserRepository;
         private FakeDatabase _fakeDatabase;
+        private ILogger<AddUserCommandHandler> _logger;
 
         [SetUp]
         public void SetUp()
         {
-            // Initialize the FakeDatabase
+
             _fakeDatabase = new FakeDatabase();
             _fakeDatabase.Users.Clear();
 
-            // Add an existing user for duplicate testing
             _fakeDatabase.Users.Add(new User
             {
                 Id = Guid.NewGuid(),
@@ -33,7 +35,11 @@ namespace BookLibrary.Tests.UserTests.CommandHandlers
                 CreatedAt = DateTime.UtcNow
             });
 
-            // Initialize the repository
+            _logger = LoggerFactory.Create(builder =>
+            {
+                builder.AddConsole();
+                builder.SetMinimumLevel(LogLevel.Debug);
+            }).CreateLogger<AddUserCommandHandler>();
             _fakeUserRepository = new FakeUserRepository(_fakeDatabase);
         }
 
@@ -49,7 +55,7 @@ namespace BookLibrary.Tests.UserTests.CommandHandlers
                 PasswordHash = "newhashedpassword",
                 CreatedAt = DateTime.UtcNow
             });
-            var handler = new AddUserCommandHandler(_fakeUserRepository, new PasswordService());
+            var handler = new AddUserCommandHandler(_fakeUserRepository, new PasswordService(), _logger);
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);
@@ -57,7 +63,7 @@ namespace BookLibrary.Tests.UserTests.CommandHandlers
             // Assert
             Assert.That(result.Success, Is.True);
             Assert.That(result.Message, Is.EqualTo("User added successfully."));
-            Assert.That(_fakeDatabase.Users.Count, Is.EqualTo(2)); // 1 existing user + 1 new user
+            Assert.That(_fakeDatabase.Users.Count, Is.EqualTo(2));
             Assert.That(_fakeDatabase.Users.Any(u => u.Username == "newuser"), Is.True);
         }
 
@@ -68,12 +74,12 @@ namespace BookLibrary.Tests.UserTests.CommandHandlers
             var command = new AddUserCommand(new User
             {
                 Id = Guid.NewGuid(),
-                Username = "existinguser", // Duplicate username
+                Username = "existinguser",
                 Email = "newemail@example.com",
                 PasswordHash = "hashedpassword",
                 CreatedAt = DateTime.UtcNow
             });
-            var handler = new AddUserCommandHandler(_fakeUserRepository, new PasswordService());
+            var handler = new AddUserCommandHandler(_fakeUserRepository, new PasswordService(), _logger);
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);
@@ -81,7 +87,7 @@ namespace BookLibrary.Tests.UserTests.CommandHandlers
             // Assert
             Assert.That(result.Success, Is.False);
             Assert.That(result.Message, Is.EqualTo("Username or email is already taken."));
-            Assert.That(_fakeDatabase.Users.Count, Is.EqualTo(1)); // No new user added
+            Assert.That(_fakeDatabase.Users.Count, Is.EqualTo(1));
         }
     }
 }

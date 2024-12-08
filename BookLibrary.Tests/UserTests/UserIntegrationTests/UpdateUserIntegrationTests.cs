@@ -8,6 +8,8 @@ using MediatR;
 using BookLibrary.Application.Common;
 using System.Threading.Tasks;
 using BookLibrary.Infrastructure.Services;
+using Microsoft.Extensions.Logging;
+using BookLibrary.Application.Users.Queries.GetUser;
 
 namespace BookLibrary.Tests.UserIntegrationTests
 {
@@ -17,6 +19,7 @@ namespace BookLibrary.Tests.UserIntegrationTests
         private RealDataBase _realDatabase;
         private RealUserRepository _realUserRepository;
         private UpdateUserCommandHandler _handler;
+        private ILogger<UpdateUserCommandHandler> _logger;
 
         [SetUp]
         public void SetUp()
@@ -27,7 +30,12 @@ namespace BookLibrary.Tests.UserIntegrationTests
 
             _realDatabase = new RealDataBase(options);
             _realUserRepository = new RealUserRepository(_realDatabase);
-            _handler = new UpdateUserCommandHandler(_realUserRepository, new PasswordService());
+            _logger = LoggerFactory.Create(builder =>
+            {
+                builder.AddConsole();
+                builder.SetMinimumLevel(LogLevel.Debug);
+            }).CreateLogger<UpdateUserCommandHandler>();
+            _handler = new UpdateUserCommandHandler(_realUserRepository, new PasswordService(), _logger);
 
             // Ensure database is clean before each test
             _realDatabase.Database.EnsureDeleted();

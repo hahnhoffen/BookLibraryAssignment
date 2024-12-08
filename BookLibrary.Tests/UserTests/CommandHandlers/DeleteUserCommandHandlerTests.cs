@@ -6,6 +6,9 @@ using BookLibrary.Application.Users.Commands.DeleteUser;
 using BookLibrary.Domain.Entities;
 using BookLibrary.Infrastructure.Repositories;
 using BookLibrary.Infrastructure.DataBase;
+using Microsoft.Extensions.Logging;
+using BookLibrary.Application.Users.Commands.AddUser;
+using BookLibrary.Application.Users.Queries.GetUser;
 
 namespace BookLibrary.Tests.UserTests.CommandHandlers
 {
@@ -15,18 +18,16 @@ namespace BookLibrary.Tests.UserTests.CommandHandlers
         private FakeUserRepository _fakeUserRepository;
         private FakeDatabase _fakeDatabase;
         private User _existingUser;
+        private ILogger<DeleteUserCommandHandler> _logger;
 
         [SetUp]
         public void SetUp()
         {
-            // Initialize the FakeDatabase
             _fakeDatabase = new FakeDatabase();
             Assert.That(_fakeDatabase, Is.Not.Null, "FakeDatabase failed to initialize.");
 
-            // Clear any existing users
             _fakeDatabase.Users.Clear();
 
-            // Add an existing user to the FakeDatabase
             _existingUser = new User
             {
                 Id = Guid.NewGuid(),
@@ -37,8 +38,11 @@ namespace BookLibrary.Tests.UserTests.CommandHandlers
             };
 
             _fakeDatabase.Users.Add(_existingUser);
-
-            // Initialize the repository with the FakeDatabase
+            _logger = LoggerFactory.Create(builder =>
+            {
+                builder.AddConsole();
+                builder.SetMinimumLevel(LogLevel.Debug);
+            }).CreateLogger<DeleteUserCommandHandler>();
             _fakeUserRepository = new FakeUserRepository(_fakeDatabase);
             Assert.That(_fakeUserRepository, Is.Not.Null, "FakeUserRepository failed to initialize.");
         }
@@ -50,7 +54,7 @@ namespace BookLibrary.Tests.UserTests.CommandHandlers
             // Arrange
             Assert.That(_fakeDatabase.Users.Count, Is.EqualTo(1), "Initial user count should be 1.");
             var command = new DeleteUserCommand(_existingUser.Id);
-            var handler = new DeleteUserCommandHandler(_fakeUserRepository);
+            var handler = new DeleteUserCommandHandler(_fakeUserRepository, _logger);
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);
@@ -67,7 +71,7 @@ namespace BookLibrary.Tests.UserTests.CommandHandlers
         {
             // Arrange
             var command = new DeleteUserCommand(Guid.NewGuid());
-            var handler = new DeleteUserCommandHandler(_fakeUserRepository);
+            var handler = new DeleteUserCommandHandler(_fakeUserRepository, _logger);
 
             // Act
             var result = await handler.Handle(command, CancellationToken.None);

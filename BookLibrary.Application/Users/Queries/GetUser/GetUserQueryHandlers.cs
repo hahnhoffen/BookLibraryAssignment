@@ -3,6 +3,7 @@ using BookLibrary.Domain.Interface;
 using MediatR;
 using BookLibrary.Application.Common;
 using Microsoft.Extensions.Logging;
+using BookLibrary.Infrastructure.Repositories;
 
 namespace BookLibrary.Application.Users.Queries.GetUser
 {
@@ -13,8 +14,8 @@ namespace BookLibrary.Application.Users.Queries.GetUser
 
         public GetUserQueryHandler(IUserRepository userRepository, ILogger<GetUserQueryHandler> logger)
         {
-            _userRepository = userRepository;
-            _logger = logger;
+            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<OperationResult<User>> Handle(GetUserQuery request, CancellationToken cancellationToken)

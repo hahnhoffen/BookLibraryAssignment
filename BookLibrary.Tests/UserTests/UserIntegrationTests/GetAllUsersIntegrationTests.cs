@@ -4,10 +4,10 @@ using BookLibrary.Infrastructure.Data;
 using BookLibrary.Infrastructure.Repositories;
 using BookLibrary.Domain.Entities;
 using BookLibrary.Application.Users.Queries.GetAllUsers;
-using MediatR;
+using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace BookLibrary.Tests.UserIntegrationTests
 {
@@ -17,6 +17,7 @@ namespace BookLibrary.Tests.UserIntegrationTests
         private RealDataBase _realDatabase;
         private RealUserRepository _realUserRepository;
         private GetAllUsersQueryHandler _handler;
+        private ILogger<GetAllUsersQueryHandler> _logger;
 
         public GetAllUsersIntegrationTests()
         {
@@ -26,17 +27,23 @@ namespace BookLibrary.Tests.UserIntegrationTests
 
             _realDatabase = new RealDataBase(options);
             _realUserRepository = new RealUserRepository(_realDatabase);
-            _handler = new GetAllUsersQueryHandler(_realUserRepository);
+
+            _logger = LoggerFactory.Create(builder =>
+            {
+                builder.AddConsole();
+                builder.SetMinimumLevel(LogLevel.Debug);
+            }).CreateLogger<GetAllUsersQueryHandler>();
+
+            
         }
 
         [SetUp]
         public void SetUp()
         {
-            // Ensure database is clean and seeded before each test
+            _handler = new GetAllUsersQueryHandler(_realUserRepository, _logger);
             _realDatabase.Database.EnsureDeleted();
             _realDatabase.Database.EnsureCreated();
 
-            // Seed users
             _realDatabase.Users.Add(new User
             {
                 Id = Guid.NewGuid(),
@@ -75,7 +82,7 @@ namespace BookLibrary.Tests.UserIntegrationTests
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Success, Is.True);
             Assert.That(result.Message, Is.EqualTo("Users retrieved successfully."));
-            Assert.That(result.Result.Count, Is.EqualTo(2)); // Matches seeded users
+            Assert.That(result.Result.Count, Is.EqualTo(2));
             Assert.That(result.Result.Any(u => u.Username == "user1"));
             Assert.That(result.Result.Any(u => u.Username == "user2"));
         }
