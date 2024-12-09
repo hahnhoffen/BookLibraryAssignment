@@ -5,12 +5,13 @@ using Microsoft.Extensions.DependencyInjection;
 using BookLibrary.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using BookLibrary.Infrastructure.Services;
+using Microsoft.Extensions.Configuration;
 
 namespace BookLibrary.Infrastructure.DependencyInjection
 {
     public static class InfrastructureServiceRegistration
     {
-        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, bool useFakeDatabase = false)
+        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration, bool useFakeDatabase = false)
         {
             if (useFakeDatabase)
             {
@@ -22,7 +23,7 @@ namespace BookLibrary.Infrastructure.DependencyInjection
             else
             {
                 services.AddDbContext<RealDataBase>(options =>
-                    options.UseSqlServer("DefaultConnection"));
+                    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
                 services.AddScoped<IBookRepository, RealBookRepository>();
                 services.AddScoped<IAuthorRepository, RealAuthorRepository>();
                 services.AddScoped<IPasswordService, PasswordService>();

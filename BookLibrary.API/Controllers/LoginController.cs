@@ -3,6 +3,7 @@ using BookLibrary.API.Helpers;
 using BookLibrary.Domain.Interface;
 using BookLibrary.Infrastructure.Services;
 using System.ComponentModel.DataAnnotations;
+using BookLibrary.API.DTOs;
 
 namespace BookLibrary.API.Controllers
 {
@@ -12,13 +13,13 @@ namespace BookLibrary.API.Controllers
     {
         private readonly IUserRepository _userRepository;
         private readonly TokenHelper _tokenHelper;
-        private readonly PasswordService _passwordService;
+        private readonly IPasswordService _passwordService;
 
         public LoginController(IUserRepository userRepository, TokenHelper tokenHelper, IPasswordService passwordService)
         {
             _userRepository = userRepository;
             _tokenHelper = tokenHelper;
-            _passwordService = (PasswordService?)passwordService;
+            _passwordService = passwordService;
         }
 
         [HttpPost("login")]
@@ -38,17 +39,5 @@ namespace BookLibrary.API.Controllers
             var token = _tokenHelper.GenerateJwtToken(user.Username, "User");
             return Ok(new { token });
         }
-    }
-
-    // DTO
-    public class LoginModel
-    {
-        [Required(ErrorMessage = "Username is required.")]
-        [StringLength(50, ErrorMessage = "Username cannot exceed 50 characters.")]
-        public string Username { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Password is required.")]
-        [MinLength(6, ErrorMessage = "Password must be at least 6 characters long.")]
-        public string Password { get; set; } = string.Empty;
     }
 }
