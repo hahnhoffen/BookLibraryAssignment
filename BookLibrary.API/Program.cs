@@ -75,7 +75,7 @@ namespace BookLibrary.API
             builder.Services.AddSingleton<TokenHelper>();
             builder.Services.AddAuthorization();
             builder.Services.AddApplicationServices();
-            builder.Services.AddInfrastructureServices();
+            builder.Services.AddInfrastructureServices(builder.Configuration);
             builder.Services.AddLogging();
 
             var app = builder.Build();

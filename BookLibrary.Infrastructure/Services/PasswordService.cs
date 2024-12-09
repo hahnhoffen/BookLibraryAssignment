@@ -12,8 +12,19 @@ namespace BookLibrary.Infrastructure.Services
 
         public bool VerifyPassword(string password, string hashedPassword)
         {
-            return BCrypt.Net.BCrypt.Verify(password, hashedPassword);
+            try
+            {
+                var isMatch = BCrypt.Net.BCrypt.Verify(password, hashedPassword);
+                Console.WriteLine($"Verifying: {password} with {hashedPassword} -> {isMatch}");
+                return isMatch;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error verifying password: {ex.Message}");
+                throw;
+            }
         }
+
     }
 }
 
