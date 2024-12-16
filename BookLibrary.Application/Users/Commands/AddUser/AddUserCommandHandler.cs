@@ -13,21 +13,6 @@ namespace BookLibrary.Application.Users.Commands.AddUser
         private readonly IUserRepository _userRepository;
         private readonly IPasswordService _passwordService;
         private readonly ILogger<AddUserCommandHandler> _logger;
-        private FakeUserRepository fakeUserRepository;
-        private PasswordService passwordService;
-        private RealUserRepository realUserRepository;
-
-        public AddUserCommandHandler(FakeUserRepository fakeUserRepository, PasswordService passwordService)
-        {
-            this.fakeUserRepository = fakeUserRepository;
-            this.passwordService = passwordService;
-        }
-
-        public AddUserCommandHandler(RealUserRepository realUserRepository, PasswordService passwordService)
-        {
-            this.realUserRepository = realUserRepository;
-            this.passwordService = passwordService;
-        }
 
         public AddUserCommandHandler(IUserRepository userRepository, IPasswordService passwordService, ILogger<AddUserCommandHandler> logger)
         {

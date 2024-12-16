@@ -11,18 +11,6 @@ namespace BookLibrary.Application.Users.Commands.DeleteUser
     {
         private readonly IUserRepository _userRepository;
         private readonly ILogger<DeleteUserCommandHandler> _logger;
-        private readonly FakeUserRepository fakeUserRepository;
-        private RealUserRepository realUserRepository;
-
-        public DeleteUserCommandHandler(FakeUserRepository fakeUserRepository)
-        {
-            this.fakeUserRepository = fakeUserRepository;
-        }
-
-        public DeleteUserCommandHandler(RealUserRepository realUserRepository)
-        {
-            this.realUserRepository = realUserRepository;
-        }
 
         public DeleteUserCommandHandler(IUserRepository userRepository, ILogger<DeleteUserCommandHandler> logger)
         {

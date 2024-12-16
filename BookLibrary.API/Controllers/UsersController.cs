@@ -20,7 +20,7 @@ public class UsersController : ControllerBase
         _passwordService = passwordService;
     }
 
-    [HttpPost]
+    [HttpPost("Register")]
     public async Task<IActionResult> AddUser([FromBody] AddUserDto userDto)
     {
         if (!ModelState.IsValid)
@@ -30,11 +30,14 @@ public class UsersController : ControllerBase
 
         var user = new User
         {
+            Id = Guid.NewGuid(),
             Username = userDto.Username,
             Email = userDto.Email,
-            PasswordHash = _passwordService.HashPassword(userDto.Password),
+            PasswordHash = userDto.Password,
             CreatedAt = DateTime.UtcNow
         };
+
+        Console.WriteLine($"Registering user: {user.Username}, Email: {user.Email}, PasswordHash: {user.PasswordHash}");
 
         var command = new AddUserCommand(user);
         var result = await _mediator.Send(command);

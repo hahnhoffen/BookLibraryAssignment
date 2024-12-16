@@ -29,10 +29,19 @@ namespace BookLibrary.API.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var user = await _userRepository.GetByUsernameAsync(login.Username);
 
-            if (user == null || !_passwordService.VerifyPassword(login.Password, user.PasswordHash))
+            var user = await _userRepository.GetByUsernameAsync(login.Username);
+            if (user == null)
             {
+                Console.WriteLine($"User not found: {login.Username}");
+                return Unauthorized("Invalid username or password.");
+            }
+
+            Console.WriteLine($"User found: {user.Username}, PasswordHash: {user.PasswordHash}");
+
+            if (!_passwordService.VerifyPassword(login.Password, user.PasswordHash))
+            {
+                Console.WriteLine($"Password verification failed for user: {login.Username}");
                 return Unauthorized("Invalid username or password.");
             }
 
