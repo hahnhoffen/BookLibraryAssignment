@@ -14,12 +14,6 @@ namespace BookLibrary.Infrastructure.Repositories
             _dataBase = dataBase;
         }
 
-        public async Task<User?> GetUserAsync(string username, string password)
-        {
-            return await _dataBase.Users
-                .FirstOrDefaultAsync(u => u.Username == username && u.PasswordHash == password);
-        }
-
         public async Task AddAsync(User user)
         {
             await _dataBase.Users.AddAsync(user);
@@ -35,6 +29,7 @@ namespace BookLibrary.Infrastructure.Repositories
         {
             return await _dataBase.Users.AnyAsync(u => u.Username == username || u.Email == email);
         }
+
         public async Task<User?> GetByIdAsync(Guid userId)
         {
             return await _dataBase.Users.FindAsync(userId);
@@ -49,10 +44,12 @@ namespace BookLibrary.Infrastructure.Repositories
                 await _dataBase.SaveChangesAsync();
             }
         }
+
         public async Task<IEnumerable<User>> GetAllAsync()
         {
             return await _dataBase.Users.ToListAsync();
         }
+
         public async Task UpdateAsync(User user)
         {
             var existingUser = await _dataBase.Users.FindAsync(user.Id);
@@ -61,8 +58,10 @@ namespace BookLibrary.Infrastructure.Repositories
                 existingUser.Username = user.Username;
                 existingUser.Email = user.Email;
                 existingUser.PasswordHash = user.PasswordHash;
+                await _dataBase.SaveChangesAsync();
             }
-            await _dataBase.SaveChangesAsync();
         }
     }
 }
+
+

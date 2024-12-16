@@ -7,7 +7,9 @@ namespace BookLibrary.Infrastructure.Services
     {
         public string HashPassword(string password)
         {
-            return BCrypt.Net.BCrypt.HashPassword(password);
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
+            Console.WriteLine($"Hashing password: {password} -> {hashedPassword}");
+            return hashedPassword;
         }
 
         public bool VerifyPassword(string password, string hashedPassword)
@@ -24,7 +26,6 @@ namespace BookLibrary.Infrastructure.Services
                 throw;
             }
         }
-
     }
 }
 
